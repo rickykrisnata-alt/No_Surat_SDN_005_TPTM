@@ -4,700 +4,1032 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Kearsipan Digital - SDN-005 TPTM</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Production CSS will replace this CDN after build -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar-item:hover { transform: translateX(4px); }
-        .fade-in { animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 256px;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sidebar-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .sidebar-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .sidebar-nav {
+            padding: 16px 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background-color: #f3f4f6;
+            transform: translateX(4px);
+        }
+
+        .sidebar-item.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-right: 2px solid #2563eb;
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 256px;
+            padding: 32px;
+            min-height: 100vh;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 32px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .stat-blue { color: #2563eb; }
+        .stat-green { color: #059669; }
+        .stat-purple { color: #7c3aed; }
+
+        .stat-description {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input:read-only {
+            background-color: #f9fafb;
+            cursor: not-allowed;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f9fafb;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Status Badge */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-yellow {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-blue {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-green {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alert-warning {
+            background-color: #fef3c7;
+            border: 1px solid #fbbf24;
+            color: #92400e;
+        }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: white;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast-success {
+            background-color: #059669;
+        }
+
+        .toast-error {
+            background-color: #dc2626;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Page visibility */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
-<body class="bg-gray-50" x-data="sistemKearsipan()">
-    
-    <!-- Main Container -->
-    <div class="flex h-screen">
-        
-        <!-- Sidebar -->
-        <div class="w-64 bg-white shadow-lg flex-shrink-0">
-            <div class="p-6">
-                <h1 class="text-2xl font-bold text-gray-800">Sistem Kearsipan</h1>
-                <p class="text-sm text-gray-600 mt-1">SDN-005 TPTM</p>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1 class="sidebar-title">Sistem Kearsipan</h1>
+            <p class="sidebar-subtitle">SDN-005 TPTM</p>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="sidebar-item active" data-page="dashboard">
+                <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Dashboard
+            </button>
+            <button class="sidebar-item" data-page="buat-surat">
+                <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Buat Surat
+            </button>
+            <button class="sidebar-item" data-page="arsip">
+                <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Arsip Surat
+            </button>
+            <button class="sidebar-item" data-page="pengguna">
+                <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                Pengguna
+            </button>
+            <button class="sidebar-item" data-page="pengaturan">
+                <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Pengaturan
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active fade-in">
+            <h2 class="page-title">Dashboard</h2>
+            
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Surat Keluar</div>
+                    <div class="stat-value stat-blue" id="total-surat">0</div>
+                    <div class="stat-description">Bulan ini</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Template Tersedia</div>
+                    <div class="stat-value stat-green" id="total-template">0</div>
+                    <div class="stat-description">Terdaftar</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Pengguna Aktif</div>
+                    <div class="stat-value stat-purple" id="total-pengguna">0</div>
+                    <div class="stat-description">Terdaftar</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buat Surat Page -->
+        <div id="buat-surat" class="page fade-in">
+            <h2 class="page-title">Pembuatan Surat Baru</h2>
+            
+            <div class="alert alert-warning" id="demo-alert">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                <span>Mode Demo: Menggunakan data local storage. Aplikasi berfungsi penuh tanpa API.</span>
             </div>
             
-            <nav class="mt-6">
-                <template x-for="item in menuItems" :key="item.id">
-                    <button
-                        @click="activeMenu = item.id"
-                        :class="activeMenu === item.id ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'"
-                        class="w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 transition-all duration-200 sidebar-item"
-                    >
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path x-show="item.id === 'dashboard'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            <path x-show="item.id === 'buat-surat'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            <path x-show="item.id === 'arsip'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            <path x-show="item.id === 'pengguna'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            <path x-show="item.id === 'pengaturan'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path x-show="item.id === 'pengaturan'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        <span x-text="item.label"></span>
-                    </button>
-                </template>
-            </nav>
-        </div>
+            <div class="card">
+                <form id="surat-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="tanggal">Tanggal Surat</label>
+                            <input type="date" id="tanggal" class="form-input" required>
+                        </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <div class="p-8">
-                
-                <!-- Dashboard -->
-                <div x-show="activeMenu === 'dashboard'" class="fade-in">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-8">Dashboard</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Surat Keluar</h3>
-                            <p class="text-3xl font-bold text-blue-600" x-text="stats.totalSurat"></p>
-                            <p class="text-sm text-gray-600">Bulan ini</p>
+                        <div class="form-group">
+                            <label class="form-label" for="klasifikasi">Klasifikasi Surat</label>
+                            <select id="klasifikasi" class="form-select" required>
+                                <option value="">Pilih Klasifikasi</option>
+                            </select>
                         </div>
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Template Tersedia</h3>
-                            <p class="text-3xl font-bold text-green-600" x-text="stats.totalTemplate"></p>
-                            <p class="text-sm text-gray-600">Terdaftar</p>
+
+                        <div class="form-group">
+                            <label class="form-label" for="nama-surat">Nama Surat</label>
+                            <input type="text" id="nama-surat" class="form-input" readonly>
                         </div>
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Pengguna Aktif</h3>
-                            <p class="text-3xl font-bold text-purple-600" x-text="stats.totalPengguna"></p>
-                            <p class="text-sm text-gray-600">Terdaftar</p>
+
+                        <div class="form-group">
+                            <label class="form-label" for="sifat-surat">Sifat Surat</label>
+                            <select id="sifat-surat" class="form-select" required>
+                                <option value="">Pilih Sifat Surat</option>
+                                <option value="biasa">Biasa</option>
+                                <option value="penting">Penting</option>
+                                <option value="rahasia">Rahasia</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="pemohon">Pemohon</label>
+                            <select id="pemohon" class="form-select" required>
+                                <option value="">Pilih Pemohon</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email-tujuan">Email Tujuan</label>
+                            <input type="email" id="email-tujuan" class="form-input" required>
                         </div>
                     </div>
-                </div>
 
-                <!-- Buat Surat -->
-                <div x-show="activeMenu === 'buat-surat'" class="fade-in">
-                    <div class="max-w-4xl mx-auto">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-8">Pembuatan Surat Baru</h2>
-                        
-                        <div class="bg-white rounded-lg shadow-lg p-6">
-                            <form @submit.prevent="submitSurat()">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    
-                                    <!-- Tanggal Surat -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Surat</label>
-                                        <input 
-                                            type="date" 
-                                            x-model="formData.tanggal"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            required
-                                        >
-                                    </div>
-
-                                    <!-- Klasifikasi Surat -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Klasifikasi Surat</label>
-                                        <select 
-                                            x-model="formData.klasifikasiId"
-                                            @change="onKlasifikasiChange()"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            required
-                                        >
-                                            <option value="">Pilih Klasifikasi</option>
-                                            <template x-for="item in klasifikasi" :key="item.id">
-                                                <option :value="item.id" x-text="`${item.kodeLengkap} - ${item.namaSurat}`"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-
-                                    <!-- Nama Surat -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Surat</label>
-                                        <input 
-                                            type="text" 
-                                            x-model="formData.namaSurat"
-                                            readonly
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-                                        >
-                                    </div>
-
-                                    <!-- Sifat Surat -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Sifat Surat</label>
-                                        <select 
-                                            x-model="formData.sifatSurat"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            required
-                                        >
-                                            <option value="">Pilih Sifat Surat</option>
-                                            <option value="biasa">Biasa</option>
-                                            <option value="penting">Penting</option>
-                                            <option value="rahasia">Rahasia</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- Pemohon -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Pemohon</label>
-                                        <select 
-                                            x-model="formData.pemohonId"
-                                            @change="onPemohonChange()"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            required
-                                        >
-                                            <option value="">Pilih Pemohon</option>
-                                            <template x-for="item in pengguna" :key="item.id">
-                                                <option :value="item.id" x-text="item.nama"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-
-                                    <!-- Email Tujuan -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Tujuan</label>
-                                        <input 
-                                            type="email" 
-                                            x-model="formData.emailTujuan"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            required
-                                        >
-                                    </div>
-                                </div>
-
-                                <!-- Dynamic Fields (Template) -->
-                                <div x-show="selectedTemplate" class="mt-8 pt-6 border-t border-gray-200">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Template</h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <template x-for="(label, key) in dynamicFields" :key="key">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-2" x-text="label"></label>
-                                                <input 
-                                                    type="text" 
-                                                    x-model="templateData[key]"
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    :placeholder="`Masukkan ${label}`"
-                                                >
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
-                                    <button 
-                                        type="button"
-                                        x-show="selectedTemplate"
-                                        @click="downloadTemplate()"
-                                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Download Template
-                                    </button>
-                                    <button 
-                                        type="submit"
-                                        :disabled="!isFormValid()"
-                                        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                        </svg>
-                                        Kirim Surat
-                                    </button>
-                                </div>
-                            </form>
+                    <!-- Dynamic Template Fields -->
+                    <div id="template-fields" style="display: none;">
+                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Data Template</h3>
+                        <div class="form-grid" id="template-fields-container">
+                            <!-- Dynamic fields will be inserted here -->
                         </div>
                     </div>
-                </div>
 
-                <!-- Arsip Surat -->
-                <div x-show="activeMenu === 'arsip'" class="fade-in">
-                    <div class="max-w-6xl mx-auto">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-8">Arsip Surat</h2>
-                        <div class="bg-white rounded-lg shadow">
-                            <div class="p-6">
-                                <div class="overflow-x-auto">
-                                    <table class="w-full">
-                                        <thead>
-                                            <tr class="border-b">
-                                                <th class="text-left py-3 px-4 font-semibold">No Urut</th>
-                                                <th class="text-left py-3 px-4 font-semibold">Tanggal</th>
-                                                <th class="text-left py-3 px-4 font-semibold">Klasifikasi</th>
-                                                <th class="text-left py-3 px-4 font-semibold">Nama Surat</th>
-                                                <th class="text-left py-3 px-4 font-semibold">Nomor Surat</th>
-                                                <th class="text-left py-3 px-4 font-semibold">Pemohon</th>
-                                                <th class="text-left py-3 px-4 font-semibold">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="surat in arsipSurat" :key="surat.id">
-                                                <tr class="border-b hover:bg-gray-50">
-                                                    <td class="py-3 px-4" x-text="surat.noUrut"></td>
-                                                    <td class="py-3 px-4" x-text="formatDate(surat.tanggal)"></td>
-                                                    <td class="py-3 px-4" x-text="surat.klasifikasi"></td>
-                                                    <td class="py-3 px-4" x-text="surat.namaSurat"></td>
-                                                    <td class="py-3 px-4" x-text="surat.nomorSurat"></td>
-                                                    <td class="py-3 px-4" x-text="surat.pemohon"></td>
-                                                    <td class="py-3 px-4">
-                                                        <span class="px-2 py-1 text-xs rounded-full"
-                                                              :class="getStatusClass(surat.status)"
-                                                              x-text="surat.status"></span>
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                            <tr x-show="arsipSurat.length === 0">
-                                                <td colspan="7" class="text-center py-8 text-gray-500">
-                                                    Belum ada surat yang diarsipkan. Buat surat pertama Anda!
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" id="download-template" style="display: none;">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Download Template
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                            Buat Surat
+                        </button>
                     </div>
-                </div>
-
-                <!-- Data Pengguna -->
-                <div x-show="activeMenu === 'pengguna'" class="fade-in">
-                    <div class="max-w-6xl mx-auto">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-8">Data Pengguna</h2>
-                        <div class="bg-white rounded-lg shadow">
-                            <div class="p-6">
-                                <div class="overflow-x-auto">
-                                    <table class="w-full">
-                                        <thead>
-                                            <tr class="border-b">
-                                                <th class="text-left py-3 px-4 font-semibold">Nama</th>
-                                                <th class="text-left py-3 px-4 font-semibold">Email</th>
-                                                <th class="text-left py-3 px-4 font-semibold">NIP</th>
-                                                <th class="text-left py-3 px-4 font-semibold">Pangkat/Golongan</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="user in pengguna" :key="user.id">
-                                                <tr class="border-b hover:bg-gray-50">
-                                                    <td class="py-3 px-4" x-text="user.nama"></td>
-                                                    <td class="py-3 px-4" x-text="user.email"></td>
-                                                    <td class="py-3 px-4" x-text="user.nip"></td>
-                                                    <td class="py-3 px-4" x-text="user.pangkatGolongan || '-'"></td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pengaturan -->
-                <div x-show="activeMenu === 'pengaturan'" class="fade-in">
-                    <div class="max-w-4xl mx-auto">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-8">Pengaturan</h2>
-                        <div class="bg-white rounded-lg shadow">
-                            <div class="p-6">
-                                <p class="text-gray-600 text-center py-8">
-                                    Fitur pengaturan akan segera tersedia.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                </form>
             </div>
         </div>
-    </div>
+
+        <!-- Arsip Page -->
+        <div id="arsip" class="page fade-in">
+            <h2 class="page-title">Arsip Surat</h2>
+            
+            <div class="card">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>No Urut</th>
+                                <th>Tanggal</th>
+                                <th>Klasifikasi</th>
+                                <th>Nama Surat</th>
+                                <th>Nomor Surat</th>
+                                <th>Pemohon</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="arsip-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 32px; color: #6b7280;">
+                                    Belum ada surat yang diarsipkan. Buat surat pertama Anda!
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pengguna Page -->
+        <div id="pengguna" class="page fade-in">
+            <h2 class="page-title">Data Pengguna</h2>
+            
+            <div class="card">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Email</th>
+                                <th>NIP</th>
+                                <th>Pangkat/Golongan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pengguna-table-body">
+                            <!-- Data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pengaturan Page -->
+        <div id="pengaturan" class="page fade-in">
+            <h2 class="page-title">Pengaturan</h2>
+            
+            <div class="card">
+                <p style="text-align: center; padding: 32px; color: #6b7280;">
+                    Fitur pengaturan akan segera tersedia.
+                </p>
+            </div>
+        </div>
+    </main>
 
     <!-- Loading Overlay -->
-    <div x-show="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+    <div class="loading" id="loading" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
             <span>Memproses...</span>
         </div>
     </div>
 
-    <!-- Success Toast -->
-    <div x-show="toast.show && toast.type !== 'error'" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 transform translate-y-2"
-         x-transition:enter-end="opacity-100 transform translate-y-0"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-        <span x-text="toast.message"></span>
-    </div>
-
-    <!-- Error Toast -->
-    <div x-show="toast.show && toast.type === 'error'" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 transform translate-y-2"
-         x-transition:enter-end="opacity-100 transform translate-y-0"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-        <span x-text="toast.message"></span>
-    </div>
-
     <script>
-        function sistemKearsipan() {
-            return {
-                activeMenu: 'dashboard',
-                loading: false,
-                toast: {
-                    show: false,
-                    message: '',
-                    type: 'success' // 'success' or 'error'
-                },
-                // Ganti dengan Web App URL Anda setelah deploy Google Apps Script
-                GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxY8O5OehBarNVTdBZyBid39fsgygZhDjUymtxzuXU2FghYE6B13mRI-4iecMy6Rss/exec',
-                menuItems: [
-                    { id: 'dashboard', label: 'Dashboard' },
-                    { id: 'buat-surat', label: 'Buat Surat' },
-                    { id: 'arsip', label: 'Arsip Surat' },
-                    { id: 'pengguna', label: 'Pengguna' },
-                    { id: 'pengaturan', label: 'Pengaturan' }
-                ],
-                stats: {
-                    totalSurat: 0,
-                    totalTemplate: 0,
-                    totalPengguna: 0
-                },
-                klasifikasi: [],
-                pengguna: [],
-                templates: [],
-                formData: {
-                    tanggal: new Date().toISOString().split('T')[0],
-                    klasifikasiId: '',
-                    namaSurat: '',
-                    sifatSurat: '',
-                    pemohonId: '',
-                    emailTujuan: ''
-                },
-                selectedTemplate: null,
-                dynamicFields: {},
-                templateData: {},
-                arsipSurat: [],
-
-                init() {
-                    this.loadData();
-                },
-
-                async loadData() {
-                    try {
-                        // Load data dari Google Apps Script
-                        const [klasifikasiRes, penggunaRes, templateRes, suratRes] = await Promise.all([
-                            this.callGAS('getKlasifikasi'),
-                            this.callGAS('getPengguna'),
-                            this.callGAS('getTemplate'),
-                            this.callGAS('getSuratKeluar')
-                        ]);
-
-                        if (klasifikasiRes) {
-                            this.klasifikasi = klasifikasiRes;
-                        }
-                        if (penggunaRes) {
-                            this.pengguna = penggunaRes;
-                            this.stats.totalPengguna = penggunaRes.length;
-                        }
-                        if (templateRes) {
-                            this.templates = templateRes.map(t => ({
-                                ...t,
-                                fieldTemplate: typeof t.fieldTemplate === 'string' ? JSON.parse(t.fieldTemplate) : t.fieldTemplate
-                            }));
-                            this.stats.totalTemplate = this.templates.length;
-                        }
-                        if (suratRes) {
-                            this.arsipSurat = suratRes;
-                            this.stats.totalSurat = suratRes.length;
-                        }
-                    } catch (error) {
-                        console.error('Error loading data:', error);
-                        // Fallback ke sample data jika API tidak tersedia
-                        this.loadSampleData();
+        // Data Storage
+        let appData = {
+            klasifikasi: [
+                { id: '1', kodeLengkap: '000.1.1', uraianKode: 'Ketatausahaan Umum', namaSurat: 'Surat Undangan Rapat Dinas' },
+                { id: '2', kodeLengkap: '000.1.2', uraianKode: 'Ketatausahaan Umum', namaSurat: 'Surat Edaran Internal' },
+                { id: '3', kodeLengkap: '000.1.3', uraianKode: 'Ketatausahaan Umum', namaSurat: 'Surat Pemberitahuan' },
+                { id: '4', kodeLengkap: '000.1.4', uraianKode: 'Ketatausahaan Umum', namaSurat: 'Surat Balasan' },
+                { id: '5', kodeLengkap: '000.3.1', uraianKode: 'Kerjasama', namaSurat: 'Surat Perjanjian Kerjasama' }
+            ],
+            pengguna: [
+                { id: '1', nama: 'Ludiah Liling, S.Pd', email: 'luduahliling@gmail.com', nip: '19690331 199807 2 001', pangkatGolongan: 'XXX' },
+                { id: '2', nama: 'Riang Ardiansyah, S.Pd.I', email: 'riangardiansyah2@gmail.com', nip: '19870829 201402 1 002', pangkatGolongan: 'IIB' },
+                { id: '3', nama: 'Irwan, S.Pd', email: 'irwansd05@gmail.com', nip: '19900909 202221 1 002', pangkatGolongan: 'Guru Ahli Pertama - IX' },
+                { id: '4', nama: 'Sudin Lan, S. Pd', email: 'sudinlan77@gmail.com', nip: '19830701 202521 1 024', pangkatGolongan: 'Guru Ahli Pertama - IX' }
+            ],
+            templates: [
+                {
+                    id: '1',
+                    klasifikasiId: '1',
+                    namaTemplate: 'Template Undangan Rapat Dinas',
+                    fieldTemplate: {
+                        tempat: 'Tempat Rapat',
+                        tanggal: 'Tanggal Rapat',
+                        waktu: 'Waktu Rapat',
+                        agenda: 'Agenda Rapat',
+                        peserta: 'Peserta Rapat'
                     }
                 },
-
-                loadSampleData() {
-                    // Sample data untuk development
-                    this.klasifikasi = [
-                        { id: '1', kodeLengkap: '000.1.1', uraianKode: 'Ketatausahaan Umum', namaSurat: 'Surat Undangan Rapat Dinas' },
-                        { id: '2', kodeLengkap: '000.1.2', uraianKode: 'Ketatausahaan Umum', namaSurat: 'Surat Edaran Internal' },
-                        { id: '3', kodeLengkap: '000.1.3', uraianKode: 'Ketatausahaan Umum', namaSurat: 'Surat Pemberitahuan' },
-                        { id: '4', kodeLengkap: '000.1.4', uraianKode: 'Ketatausahaan Umum', namaSurat: 'Surat Balasan' },
-                        { id: '5', kodeLengkap: '000.3.1', uraianKode: 'Kerjasama', namaSurat: 'Surat Perjanjian Kerjasama' }
-                    ];
-                    
-                    this.pengguna = [
-                        { id: '1', nama: 'Ludiah Liling, S.Pd', email: 'luduahliling@gmail.com', nip: '19690331 199807 2 001', pangkatGolongan: 'XXX' },
-                        { id: '2', nama: 'Riang Ardiansyah, S.Pd.I', email: 'riangardiansyah2@gmail.com', nip: '19870829 201402 1 002', pangkatGolongan: 'IIB' },
-                        { id: '3', nama: 'Irwan, S.Pd', email: 'irwansd05@gmail.com', nip: '19900909 202221 1 002', pangkatGolongan: 'Guru Ahli Pertama - IX' },
-                        { id: '4', nama: 'Sudin Lan, S. Pd', email: 'sudinlan77@gmail.com', nip: '19830701 202521 1 024', pangkatGolongan: 'Guru Ahli Pertama - IX' }
-                    ];
-                    
-                    this.templates = [
-                        {
-                            id: '1',
-                            klasifikasiId: '1',
-                            namaTemplate: 'Template Undangan Rapat Dinas',
-                            fieldTemplate: {
-                                tempat: 'Tempat Rapat',
-                                tanggal: 'Tanggal Rapat',
-                                waktu: 'Waktu Rapat',
-                                agenda: 'Agenda Rapat',
-                                peserta: 'Peserta Rapat'
-                            }
-                        },
-                        {
-                            id: '2',
-                            klasifikasiId: '5',
-                            namaTemplate: 'Template Perjanjian Kerjasama',
-                            fieldTemplate: {
-                                namaMitra: 'Nama Mitra',
-                                alamatMitra: 'Alamat Mitra',
-                                judulKerjasama: 'Judul Kerjasama',
-                                masaBerlaku: 'Masa Berlaku',
-                                tanggungJawab: 'Tanggung Jawab'
-                            }
-                        }
-                    ];
-                    
-                    this.stats.totalPengguna = this.pengguna.length;
-                    this.stats.totalTemplate = this.templates.length;
-                },
-
-                async callGAS(action, data = null) {
-                    if (this.GAS_WEB_APP_URL === 'YOUR_WEB_APP_URL_HERE') {
-                        console.warn('Google Apps Script URL not configured');
-                        return null;
+                {
+                    id: '2',
+                    klasifikasiId: '5',
+                    namaTemplate: 'Template Perjanjian Kerjasama',
+                    fieldTemplate: {
+                        namaMitra: 'Nama Mitra',
+                        alamatMitra: 'Alamat Mitra',
+                        judulKerjasama: 'Judul Kerjasama',
+                        masaBerlaku: 'Masa Berlaku',
+                        tanggungJawab: 'Tanggung Jawab'
                     }
+                }
+            ],
+            arsipSurat: []
+        };
 
-                    try {
-                        const url = `${this.GAS_WEB_APP_URL}?action=${action}`;
-                        const response = await fetch(url, {
-                            method: data ? 'POST' : 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: data ? JSON.stringify(data) : undefined
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('sistemKearsipanData');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                appData = { ...appData, ...parsed };
+            }
+            updateDashboard();
+            populateKlasifikasi();
+            populatePengguna();
+            updateArsipTable();
+            updatePenggunaTable();
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('sistemKearsipanData', JSON.stringify(appData));
+        }
+
+        // Update dashboard stats
+        function updateDashboard() {
+            document.getElementById('total-surat').textContent = appData.arsipSurat.length;
+            document.getElementById('total-template').textContent = appData.templates.length;
+            document.getElementById('total-pengguna').textContent = appData.pengguna.length;
+        }
+
+        // Populate klasifikasi dropdown
+        function populateKlasifikasi() {
+            const select = document.getElementById('klasifikasi');
+            select.innerHTML = '<option value="">Pilih Klasifikasi</option>';
+            
+            appData.klasifikasi.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.kodeLengkap} - ${item.namaSurat}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Populate pengguna dropdown
+        function populatePengguna() {
+            const select = document.getElementById('pemohon');
+            select.innerHTML = '<option value="">Pilih Pemohon</option>';
+            
+            appData.pengguna.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.nama;
+                select.appendChild(option);
+            });
+        }
+
+        // Update arsip table
+        function updateArsipTable() {
+            const tbody = document.getElementById('arsip-table-body');
+            
+            if (appData.arsipSurat.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 32px; color: #6b7280;">
+                            Belum ada surat yang diarsipkan. Buat surat pertama Anda!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = appData.arsipSurat.map(surat => `
+                <tr>
+                    <td>${surat.noUrut}</td>
+                    <td>${formatDate(surat.tanggal)}</td>
+                    <td>${surat.klasifikasi}</td>
+                    <td>${surat.namaSurat}</td>
+                    <td style="font-family: monospace; font-size: 12px;">${surat.nomorSurat}</td>
+                    <td>${surat.pemohon}</td>
+                    <td>
+                        <span class="badge ${getStatusClass(surat.status)}">${surat.status}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Update pengguna table
+        function updatePenggunaTable() {
+            const tbody = document.getElementById('pengguna-table-body');
+            
+            tbody.innerHTML = appData.pengguna.map(user => `
+                <tr>
+                    <td>${user.nama}</td>
+                    <td>${user.email}</td>
+                    <td>${user.nip}</td>
+                    <td>${user.pangkatGolongan || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        // Get status class
+        function getStatusClass(status) {
+            switch(status) {
+                case 'draft': return 'badge-yellow';
+                case 'dikirim': return 'badge-blue';
+                case 'disetujui': return 'badge-green';
+                default: return 'badge-yellow';
+            }
+        }
+
+        // Convert number to Roman
+        function toRoman(num) {
+            const romanNumerals = [
+                { value: 1000, numeral: 'M' },
+                { value: 900, numeral: 'CM' },
+                { value: 500, numeral: 'D' },
+                { value: 400, numeral: 'CD' },
+                { value: 100, numeral: 'C' },
+                { value: 90, numeral: 'XC' },
+                { value: 50, numeral: 'L' },
+                { value: 40, numeral: 'XL' },
+                { value: 10, numeral: 'X' },
+                { value: 9, numeral: 'IX' },
+                { value: 5, numeral: 'V' },
+                { value: 4, numeral: 'IV' },
+                { value: 1, numeral: 'I' }
+            ];
+            
+            let result = '';
+            let remaining = num;
+            
+            for (const { value, numeral } of romanNumerals) {
+                while (remaining >= value) {
+                    result += numeral;
+                    remaining -= value;
+                }
+            }
+            
+            return result;
+        }
+
+        // Generate nomor surat
+        function generateNomorSurat(klasifikasi, noUrut) {
+            const currentDate = new Date();
+            const romanMonth = toRoman(currentDate.getMonth() + 1);
+            const year = currentDate.getFullYear();
+            const noUrutFormatted = String(noUrut).padStart(3, '0');
+            return `${klasifikasi.kodeLengkap}/${noUrutFormatted}/SDN-005 TPTM/${romanMonth}/${year}`;
+        }
+
+        // Show toast
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Show/hide loading
+        function toggleLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+        }
+
+        // Page navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from all sidebar items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Add active class to selected sidebar item
+            document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load initial data
+            loadData();
+            
+            // Set today's date as default
+            document.getElementById('tanggal').valueAsDate = new Date();
+            
+            // Sidebar navigation
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const pageId = this.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+            
+            // Klasifikasi change
+            document.getElementById('klasifikasi').addEventListener('change', function() {
+                const selectedId = this.value;
+                const selected = appData.klasifikasi.find(k => k.id === selectedId);
+                
+                if (selected) {
+                    document.getElementById('nama-surat').value = selected.namaSurat;
+                    
+                    // Check if template exists
+                    const template = appData.templates.find(t => t.klasifikasiId === selectedId);
+                    const templateFields = document.getElementById('template-fields');
+                    const downloadBtn = document.getElementById('download-template');
+                    
+                    if (template) {
+                        // Show template fields
+                        templateFields.style.display = 'block';
+                        downloadBtn.style.display = 'inline-flex';
+                        
+                        // Generate dynamic fields
+                        const container = document.getElementById('template-fields-container');
+                        container.innerHTML = '';
+                        
+                        Object.entries(template.fieldTemplate).forEach(([key, label]) => {
+                            const fieldGroup = document.createElement('div');
+                            fieldGroup.className = 'form-group';
+                            fieldGroup.innerHTML = `
+                                <label class="form-label" for="template-${key}">${label}</label>
+                                <input type="text" id="template-${key}" class="form-input" placeholder="Masukkan ${label}">
+                            `;
+                            container.appendChild(fieldGroup);
                         });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const result = await response.json();
-                        
-                        if (result.status === 'error') {
-                            throw new Error(result.message);
-                        }
-
-                        return result.data;
-                    } catch (error) {
-                        console.error(`Error calling GAS for ${action}:`, error);
-                        
-                        // Tampilkan error yang lebih user-friendly
-                        if (error.message.includes('CORS')) {
-                            this.showToast('Koneksi ke server gagal. Silakan coba lagi atau hubungi admin.', 'error');
-                        } else if (error.message.includes('Network')) {
-                            this.showToast('Tidak ada koneksi internet. Silakan periksa jaringan Anda.', 'error');
-                        } else {
-                            this.showToast(`Error: ${error.message}`, 'error');
-                        }
-                        
-                        return null;
+                    } else {
+                        // Hide template fields
+                        templateFields.style.display = 'none';
+                        downloadBtn.style.display = 'none';
                     }
-                },
-
-                onKlasifikasiChange() {
-                    const selected = this.klasifikasi.find(k => k.id === this.formData.klasifikasiId);
-                    if (selected) {
-                        this.formData.namaSurat = selected.namaSurat;
-                        
-                        // Check if template exists
-                        this.selectedTemplate = this.templates.find(t => t.klasifikasiId === this.formData.klasifikasiId);
-                        
-                        if (this.selectedTemplate) {
-                            this.dynamicFields = this.selectedTemplate.fieldTemplate;
-                            this.templateData = {};
-                            Object.keys(this.dynamicFields).forEach(key => {
-                                this.templateData[key] = '';
-                            });
-                        } else {
-                            this.selectedTemplate = null;
-                            this.dynamicFields = {};
-                            this.templateData = {};
+                } else {
+                    document.getElementById('nama-surat').value = '';
+                    document.getElementById('template-fields').style.display = 'none';
+                    document.getElementById('download-template').style.display = 'none';
+                }
+            });
+            
+            // Pemohon change
+            document.getElementById('pemohon').addEventListener('change', function() {
+                const selectedId = this.value;
+                const selected = appData.pengguna.find(p => p.id === selectedId);
+                
+                if (selected) {
+                    document.getElementById('email-tujuan').value = selected.email;
+                } else {
+                    document.getElementById('email-tujuan').value = '';
+                }
+            });
+            
+            // Form submission
+            document.getElementById('surat-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form data
+                const formData = {
+                    tanggal: document.getElementById('tanggal').value,
+                    klasifikasiId: document.getElementById('klasifikasi').value,
+                    namaSurat: document.getElementById('nama-surat').value,
+                    sifatSurat: document.getElementById('sifat-surat').value,
+                    pemohonId: document.getElementById('pemohon').value,
+                    emailTujuan: document.getElementById('email-tujuan').value
+                };
+                
+                // Validate form
+                if (!formData.tanggal || !formData.klasifikasiId || !formData.namaSurat || 
+                    !formData.sifatSurat || !formData.pemohonId || !formData.emailTujuan) {
+                    showToast('Harap lengkapi semua field yang required', 'error');
+                    return;
+                }
+                
+                // Get template data if exists
+                const template = appData.templates.find(t => t.klasifikasiId === formData.klasifikasiId);
+                let templateData = {};
+                
+                if (template) {
+                    Object.keys(template.fieldTemplate).forEach(key => {
+                        const value = document.getElementById(`template-${key}`).value;
+                        if (!value.trim()) {
+                            showToast(`Harap lengkapi field: ${template.fieldTemplate[key]}`, 'error');
+                            return;
                         }
-                    }
-                },
-
-                onPemohonChange() {
-                    const selected = this.pengguna.find(p => p.id === this.formData.pemohonId);
-                    if (selected) {
-                        this.formData.emailTujuan = selected.email;
-                    }
-                },
-
-                isFormValid() {
-                    return this.formData.tanggal && 
-                           this.formData.klasifikasiId && 
-                           this.formData.namaSurat && 
-                           this.formData.sifatSurat && 
-                           this.formData.pemohonId && 
-                           this.formData.emailTujuan &&
-                           (!this.selectedTemplate || Object.values(this.templateData).every(value => value.trim() !== ''));
-                },
-
-                async submitSurat() {
-                    if (!this.isFormValid()) return;
-
-                    this.loading = true;
-                    
-                    try {
-                        const suratData = {
-                            ...this.formData,
-                            templateData: this.templateData
-                        };
-
-                        let result;
-                        if (this.GAS_WEB_APP_URL !== 'YOUR_WEB_APP_URL_HERE') {
-                            // Call Google Apps Script API
-                            result = await this.callGAS('createSurat', suratData);
-                        } else {
-                            // Fallback untuk development
-                            result = await this.createSuratLocally(suratData);
-                        }
-                        
-                        if (result) {
-                            this.showToast(`Surat berhasil dibuat dengan nomor: ${result.nomorSurat}`);
-                            
-                            // Reload data
-                            this.loadData();
-                            
-                            // Reset form
-                            this.resetForm();
-                        }
-                        
-                    } catch (error) {
-                        console.error('Error submitting surat:', error);
-                        this.showToast('Terjadi kesalahan saat membuat surat', 'error');
-                    } finally {
-                        this.loading = false;
-                    }
-                },
-
-                async createSuratLocally(data) {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    const selectedKlasifikasi = this.klasifikasi.find(k => k.id === data.klasifikasiId);
-                    const noUrut = this.arsipSurat.length + 1;
-                    const romanMonth = this.toRoman(new Date().getMonth() + 1);
-                    const year = new Date().getFullYear();
-                    const noUrutFormatted = String(noUrut).padStart(3, '0');
-                    const nomorSurat = `${selectedKlasifikasi.kodeLengkap}/${noUrutFormatted}/SDN-005 TPTM/${romanMonth}/${year}`;
+                        templateData[key] = value;
+                    });
+                }
+                
+                // Show loading
+                toggleLoading(true);
+                
+                // Simulate processing
+                setTimeout(() => {
+                    // Generate surat data
+                    const klasifikasi = appData.klasifikasi.find(k => k.id === formData.klasifikasiId);
+                    const pemohon = appData.pengguna.find(p => p.id === formData.pemohonId);
+                    const noUrut = appData.arsipSurat.length + 1;
+                    const nomorSurat = generateNomorSurat(klasifikasi, noUrut);
                     
                     const newSurat = {
                         id: Date.now(),
                         noUrut: noUrut,
-                        tanggal: data.tanggal,
-                        klasifikasi: `${selectedKlasifikasi.kodeLengkap} - ${selectedKlasifikasi.namaSurat}`,
-                        namaSurat: data.namaSurat,
+                        tanggal: formData.tanggal,
+                        klasifikasi: `${klasifikasi.kodeLengkap} - ${klasifikasi.namaSurat}`,
+                        namaSurat: formData.namaSurat,
+                        sifatSurat: formData.sifatSurat,
                         nomorSurat: nomorSurat,
-                        pemohon: this.pengguna.find(p => p.id === data.pemohonId).nama,
-                        status: 'draft'
+                        pemohon: pemohon.nama,
+                        emailTujuan: formData.emailTujuan,
+                        status: 'draft',
+                        templateData: templateData
                     };
                     
-                    this.arsipSurat.unshift(newSurat);
-                    this.stats.totalSurat = this.arsipSurat.length;
+                    // Add to arsip
+                    appData.arsipSurat.unshift(newSurat);
                     
-                    // Save to localStorage untuk demo
-                    localStorage.setItem('arsipSurat', JSON.stringify(this.arsipSurat));
+                    // Save data
+                    saveData();
                     
-                    return newSurat;
-                },
-
-                resetForm() {
-                    this.formData = {
-                        tanggal: new Date().toISOString().split('T')[0],
-                        klasifikasiId: '',
-                        namaSurat: '',
-                        sifatSurat: '',
-                        pemohonId: '',
-                        emailTujuan: ''
-                    };
-                    this.selectedTemplate = null;
-                    this.dynamicFields = {};
-                    this.templateData = {};
-                },
-
-                // Helper function untuk konversi angka ke Romawi
-                toRoman(num) {
-                    const romanNumerals = [
-                        { value: 1000, numeral: 'M' },
-                        { value: 900, numeral: 'CM' },
-                        { value: 500, numeral: 'D' },
-                        { value: 400, numeral: 'CD' },
-                        { value: 100, numeral: 'C' },
-                        { value: 90, numeral: 'XC' },
-                        { value: 50, numeral: 'L' },
-                        { value: 40, numeral: 'XL' },
-                        { value: 10, numeral: 'X' },
-                        { value: 9, numeral: 'IX' },
-                        { value: 5, numeral: 'V' },
-                        { value: 4, numeral: 'IV' },
-                        { value: 1, numeral: 'I' }
-                    ];
+                    // Update UI
+                    updateDashboard();
+                    updateArsipTable();
                     
-                    let result = '';
-                    let remaining = num;
+                    // Reset form
+                    document.getElementById('surat-form').reset();
+                    document.getElementById('tanggal').valueAsDate = new Date();
+                    document.getElementById('template-fields').style.display = 'none';
+                    document.getElementById('download-template').style.display = 'none';
                     
-                    for (const { value, numeral } of romanNumerals) {
-                        while (remaining >= value) {
-                            result += numeral;
-                            remaining -= value;
-                        }
-                    }
+                    // Hide loading
+                    toggleLoading(false);
                     
-                    return result;
-                },
-
-                downloadTemplate() {
-                    if (this.selectedTemplate && this.selectedTemplate.googleDocId) {
-                        window.open(`https://docs.google.com/document/d/${this.selectedTemplate.googleDocId}/export?format=pdf`, '_blank');
-                    } else {
-                        this.showToast('Template Google Docs tidak tersedia');
-                    }
-                },
-
-                formatDate(dateString) {
-                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                    return new Date(dateString).toLocaleDateString('id-ID', options);
-                },
-
-                getStatusClass(status) {
-                    switch(status) {
-                        case 'draft': return 'bg-yellow-100 text-yellow-800';
-                        case 'dikirim': return 'bg-blue-100 text-blue-800';
-                        case 'disetujui': return 'bg-green-100 text-green-800';
-                        default: return 'bg-gray-100 text-gray-800';
-                    }
-                },
-
-                showToast(message, type = 'success') {
-                    this.toast.message = message;
-                    this.toast.type = type;
-                    this.toast.show = true;
-                    
-                    setTimeout(() => {
-                        this.toast.show = false;
-                    }, 3000);
-                }
-            }
-        }
+                    // Show success message
+                    showToast(`Surat berhasil dibuat dengan nomor: ${nomorSurat}`, 'success');
+                }, 1500);
+            });
+            
+            // Download template button
+            document.getElementById('download-template').addEventListener('click', function() {
+                showToast('Fitur download template akan segera tersedia', 'success');
+            });
+        });
     </script>
 </body>
 </html>
