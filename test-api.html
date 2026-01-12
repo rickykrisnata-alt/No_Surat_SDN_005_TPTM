@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API - Sistem Kearsipan Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">API Test Dashboard</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Configuration</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Google Apps Script URL:</label>
+                    <input type="text" id="gasUrl" class="w-full p-2 border rounded" placeholder="https://script.google.com/macros/s/...">
+                </div>
+                <button onclick="saveConfig()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Save Configuration
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Test Get Data -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Test GET Endpoints</h2>
+                <div class="space-y-3">
+                    <button onclick="testEndpoint('getKlasifikasi')" class="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Get Klasifikasi
+                    </button>
+                    <button onclick="testEndpoint('getPengguna')" class="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Get Pengguna
+                    </button>
+                    <button onclick="testEndpoint('getTemplate')" class="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Get Template
+                    </button>
+                    <button onclick="testEndpoint('getSuratKeluar')" class="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Get Surat Keluar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Test Create Data -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Test POST Endpoints</h2>
+                <div class="space-y-3">
+                    <button onclick="testCreateSurat()" class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                        Create Test Surat
+                    </button>
+                    <button onclick="testCreateKlasifikasi()" class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                        Create Test Klasifikasi
+                    </button>
+                    <button onclick="testCreatePengguna()" class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                        Create Test Pengguna
+                    </button>
+                    <button onclick="testCreateTemplate()" class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                        Create Test Template
+                    </button>
+                </div>
+            </div>
+
+            <!-- Test Roman Conversion -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Test Roman Numeral Conversion</h2>
+                <div class="space-y-3">
+                    <button onclick="testRomanConversion()" class="w-full bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                        Test Roman Conversion
+                    </button>
+                    <p class="text-sm text-gray-600">Test format: 000.3.1/015/SDN-005 TPTM/V/2026</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="bg-white rounded-lg shadow p-6 mt-6">
+            <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+            <div id="results" class="space-y-4 max-h-96 overflow-y-auto">
+                <p class="text-gray-500">Test results will appear here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let GAS_URL = localStorage.getItem('gasUrl') || '';
+
+        function saveConfig() {
+            GAS_URL = document.getElementById('gasUrl').value;
+            localStorage.setItem('gasUrl', GAS_URL);
+            alert('Configuration saved!');
+        }
+
+        function loadConfig() {
+            if (GAS_URL) {
+                document.getElementById('gasUrl').value = GAS_URL;
+            }
+        }
+
+        async function testEndpoint(action) {
+            if (!GAS_URL) {
+                alert('Please configure Google Apps Script URL first!');
+                return;
+            }
+
+            addResult(`Testing ${action}...`, 'info');
+            
+            try {
+                const response = await fetch(`${GAS_URL}?action=${action}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ ${action} - Success`, 'success', result);
+                } else {
+                    addResult(`❌ ${action} - Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ ${action} - Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateSurat() {
+            if (!GAS_URL) {
+                alert('Please configure Google Apps Script URL first!');
+                return;
+            }
+
+            const testData = {
+                tanggal: '2026-01-17',
+                klasifikasiId: '5', // Klasifikasi Perjanjian Kerjasama
+                namaSurat: 'Test Surat Perjanjian Kerjasama',
+                sifatSurat: 'penting',
+                pemohonId: '1',
+                emailTujuan: 'test@example.com'
+            };
+
+            addResult('Creating test surat...', 'info');
+            
+            try {
+                const response = await fetch(`${GAS_URL}?action=createSurat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Create Surat - Success`, 'success', result);
+                } else {
+                    addResult(`❌ Create Surat - Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Create Surat - Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateKlasifikasi() {
+            if (!GAS_URL) {
+                alert('Please configure Google Apps Script URL first!');
+                return;
+            }
+
+            const testData = {
+                kodeLengkap: '000.2.1',
+                uraianKode: 'Surat Menyurat',
+                namaSurat: 'Surat Permohonan Baru'
+            };
+
+            addResult('Creating test klasifikasi...', 'info');
+            
+            try {
+                const response = await fetch(`${GAS_URL}?action=createKlasifikasi`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Create Klasifikasi - Success`, 'success', result);
+                } else {
+                    addResult(`❌ Create Klasifikasi - Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Create Klasifikasi - Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreatePengguna() {
+            if (!GAS_URL) {
+                alert('Please configure Google Apps Script URL first!');
+                return;
+            }
+
+            const testData = {
+                nama: 'Test User',
+                email: 'testuser@example.com',
+                nip: '123456789 202201 1 001',
+                pangkatGolongan: 'Test Golongan'
+            };
+
+            addResult('Creating test pengguna...', 'info');
+            
+            try {
+                const response = await fetch(`${GAS_URL}?action=createPengguna`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Create Pengguna - Success`, 'success', result);
+                } else {
+                    addResult(`❌ Create Pengguna - Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Create Pengguna - Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateTemplate() {
+            if (!GAS_URL) {
+                alert('Please configure Google Apps Script URL first!');
+                return;
+            }
+
+            const testData = {
+                klasifikasiId: '1',
+                namaTemplate: 'Test Template API',
+                fieldTemplate: {
+                    field1: 'Test Field 1',
+                    field2: 'Test Field 2'
+                },
+                googleDocId: ''
+            };
+
+            addResult('Creating test template...', 'info');
+            
+            try {
+                const response = await fetch(`${GAS_URL}?action=createTemplate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Create Template - Success`, 'success', result);
+                } else {
+                    addResult(`❌ Create Template - Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Create Template - Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Helper function untuk konversi angka ke Romawi
+        function toRoman(num) {
+            const romanNumerals = [
+                { value: 1000, numeral: 'M' },
+                { value: 900, numeral: 'CM' },
+                { value: 500, numeral: 'D' },
+                { value: 400, numeral: 'CD' },
+                { value: 100, numeral: 'C' },
+                { value: 90, numeral: 'XC' },
+                { value: 50, numeral: 'L' },
+                { value: 40, numeral: 'XL' },
+                { value: 10, numeral: 'X' },
+                { value: 9, numeral: 'IX' },
+                { value: 5, numeral: 'V' },
+                { value: 4, numeral: 'IV' },
+                { value: 1, numeral: 'I' }
+            ];
+            
+            let result = '';
+            let remaining = num;
+            
+            for (const { value, numeral } of romanNumerals) {
+                while (remaining >= value) {
+                    result += numeral;
+                    remaining -= value;
+                }
+            }
+            
+            return result;
+        }
+
+        function testRomanConversion() {
+            addResult('Testing Roman numeral conversion...', 'info');
+            
+            const testCases = [
+                { input: 1, expected: 'I' },
+                { input: 2, expected: 'II' },
+                { input: 3, expected: 'III' },
+                { input: 4, expected: 'IV' },
+                { input: 5, expected: 'V' },
+                { input: 6, expected: 'VI' },
+                { input: 7, expected: 'VII' },
+                { input: 8, expected: 'VIII' },
+                { input: 9, expected: 'IX' },
+                { input: 10, expected: 'X' },
+                { input: 11, expected: 'XI' },
+                { input: 12, expected: 'XII' }
+            ];
+            
+            let allPassed = true;
+            testCases.forEach(testCase => {
+                const result = toRoman(testCase.input);
+                const passed = result === testCase.expected;
+                if (!passed) allPassed = false;
+                addResult(`${passed ? '✅' : '❌'} ${testCase.input} → ${result} (expected: ${testCase.expected})`, passed ? 'success' : 'error');
+            });
+            
+            // Test format nomor surat
+            const testNoUrut = 15;
+            const testKode = '000.3.1';
+            const testMonth = toRoman(5); // Mei
+            const testYear = 2026;
+            const noUrutFormatted = String(testNoUrut).padStart(3, '0');
+            const testNomorSurat = `${testKode}/${noUrutFormatted}/SDN-005 TPTM/${testMonth}/${testYear}`;
+            
+            addResult(`📄 Test nomor surat format: ${testNomorSurat}`, 'info');
+            
+            if (allPassed) {
+                addResult('✅ All Roman numeral tests passed!', 'success');
+            }
+        }
+
+        function addResult(message, type, data = null) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let colorClass = 'text-gray-600';
+            if (type === 'success') colorClass = 'text-green-600';
+            if (type === 'error') colorClass = 'text-red-600';
+            if (type === 'info') colorClass = 'text-blue-600';
+            
+            let resultHtml = `
+                <div class="border rounded p-3 ${type === 'error' ? 'border-red-200 bg-red-50' : type === 'success' ? 'border-green-200 bg-green-50' : 'border-gray-200'}">
+                    <div class="${colorClass} font-medium">[${timestamp}] ${message}</div>
+            `;
+            
+            if (data) {
+                resultHtml += `<pre class="mt-2 text-xs bg-gray-100 p-2 rounded overflow-x-auto">${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            resultHtml += '</div>';
+            
+            results.innerHTML = resultHtml + results.innerHTML;
+        }
+
+        // Load configuration on page load
+        loadConfig();
+    </script>
+</body>
+</html>
